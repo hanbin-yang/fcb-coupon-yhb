@@ -1,0 +1,48 @@
+server:
+  port: 8091
+  netty:
+    connection-timeout: 5000
+  servlet:
+    context-path: /basics-promotion-service
+spring:
+  profiles:
+    active: dev
+  application:
+    name: fcb-coupon-app
+  mvc:
+    throw-exception-if-no-handler-found: true
+  resources:
+    add-mappings: false
+  jackson:
+    serialization:
+      WRITE_BIGDECIMAL_AS_PLAIN: true
+
+#日志
+logging:
+  path: /data/apps/logs/fcb-coupon-app
+  level:
+    root: INFO
+
+#mybatis-plus配置
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/*.xml
+  global-config:
+    db-config:
+      db-type: mysql
+      #字段策略 0:"忽略判断",1:"非 NULL 判断"),2:"非空判断"
+      field-strategy: NOT_NULL
+      #驼峰下划线转换
+      table-underline: true
+      #逻辑删除配置（下面3个配置）
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+    banner: false
+  configuration:
+    map-underscore-to-camel-case: true
+#swagger
+swagger:
+  info:
+    title: '优惠券服务'
+    description: '优惠券APP服务'
+    version: 'v1'
+    controllerPath: "com.fcb.coupon.app.controller"

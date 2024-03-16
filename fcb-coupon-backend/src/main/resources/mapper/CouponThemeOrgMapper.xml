@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fcb.coupon.backend.mapper.CouponThemeOrgMapper">
+    <resultMap id="BaseResultMap" type="com.fcb.coupon.backend.model.entity.CouponThemeOrgEntity">
+        <id column="id" jdbcType="BIGINT" property="id" />
+        <result column="coupon_theme_id" jdbcType="BIGINT" property="couponThemeId" />
+        <result column="org_id" jdbcType="BIGINT" property="orgId" />
+        <result column="org_level_code" jdbcType="VARCHAR" property="orgLevelCode" />
+        <result column="create_userid" jdbcType="BIGINT" property="createUserid" />
+        <result column="create_username" jdbcType="VARCHAR" property="createUsername" />
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+        <result column="update_userid" jdbcType="BIGINT" property="updateUserid" />
+        <result column="update_username" jdbcType="VARCHAR" property="updateUsername" />
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+        <result column="version_no" jdbcType="INTEGER" property="versionNo" />
+        <result column="is_deleted" jdbcType="TINYINT" property="isDeleted" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, coupon_theme_id, org_id, org_level_code, create_userid, create_username,
+    create_time, update_userid, update_username, update_time, version_no,
+    is_deleted
+    </sql>
+
+    <insert id="insertBatch">
+        insert into coupon_theme_org
+        (
+        <include refid="Base_Column_List" />
+        )
+        values
+        <foreach collection="list" item="m" separator=",">
+            (
+            #{m.id},#{m.couponThemeId},#{m.orgId},#{m.orgLevelCode},
+            #{m.createUserid},#{m.createUsername},#{m.createTime},#{m.updateUserid},
+            #{m.updateUsername},#{m.updateTime},#{m.versionNo},#{m.isDeleted}
+            )
+        </foreach>
+    </insert>
+</mapper>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fcb.coupon.app.mapper.CouponUserStatisticMapper">
+  <resultMap id="BaseResultMap" type="com.fcb.coupon.app.model.entity.CouponUserStatisticEntity">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="coupon_theme_id" jdbcType="BIGINT" property="couponThemeId" />
+    <result column="user_id" jdbcType="VARCHAR" property="userId" />
+    <result column="user_type" jdbcType="TINYINT" property="userType" />
+    <result column="total_count" jdbcType="INTEGER" property="totalCount" />
+    <result column="month_count" jdbcType="INTEGER" property="monthCount" />
+    <result column="today_count" jdbcType="INTEGER" property="todayCount" />
+    <result column="last_receive_date" jdbcType="TIMESTAMP" property="lastReceiveDate" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="version_no" jdbcType="INTEGER" property="versionNo" />
+    <result column="is_deleted" jdbcType="TINYINT" property="isDeleted" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, coupon_theme_id, user_id, user_type, total_count, month_count, today_count, last_receive_date, 
+    create_time, update_time, version_no, is_deleted
+  </sql>
+
+  <update id="updateIndividualLimit">
+    update coupon_user_statistic set
+    last_receive_date=last_receive_date,
+    total_count=total_count + #{receiveCount}
+    where coupon_theme_id = #{couponThemeId} and user_id = #{userId} and user_type = #{userType} and total_count + #{receiveCount} &lt;= #{individualLimit}
+  </update>
+  <update id="updateMonthLimit">
+    update coupon_user_statistic set
+    last_receive_date=last_receive_date,
+    month_count=
+    IF(last_receive_date &lt; DATE_FORMAT(CURDATE(), '%Y-%m-01 00:00:00'), #{receiveCount}, month_count+#{receiveCount})
+    where coupon_theme_id = #{couponThemeId} and user_id = #{userId} and user_type = #{userType} and
+    IF(last_receive_date &lt; DATE_FORMAT(CURDATE(), '%Y-%m-01 00:00:00'), 1=1, month_count+#{receiveCount} &lt;= #{monthLimit})
+  </update>
+  <update id="updateDayLimit">
+    update coupon_user_statistic set
+    today_count=
+    IF(last_receive_date &lt; CURDATE(), #{receiveCount}, today_count+#{receiveCount})
+    where coupon_theme_id = #{couponThemeId} and user_id = #{userId} and user_type = #{userType} and
+    IF(last_receive_date &lt; CURDATE(), 1=1, today_count+#{receiveCount} &lt;= #{dayLimit})
+  </update>
+</mapper>

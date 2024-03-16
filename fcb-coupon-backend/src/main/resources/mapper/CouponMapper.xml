@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fcb.coupon.backend.mapper.CouponMapper">
+
+  <sql id="Base_Column_List">
+    id,
+    coupon_theme_id,
+    coupon_discount_type,
+    coupon_value,
+    coupon_code,
+    theme_title,
+    coupon_type,
+    start_time,
+    end_time,
+    `status`,
+    `source`,
+    source_id,
+    user_type,
+    user_id,
+    device_mac,
+    create_userid,
+    create_username,
+    create_time,
+    update_userid,
+    update_username,
+    update_time,
+    version_no,
+    is_deleted
+  </sql>
+
+  <insert id="insertBatch">
+    insert into coupon
+    (
+    <include refid="Base_Column_List" />
+    )
+    values
+    <foreach collection="list" item="m" separator=",">
+      (
+      #{m.id},
+      #{m.couponThemeId},
+      #{m.couponDiscountType},
+      #{m.couponValue},
+      #{m.couponCode},
+      #{m.themeTitle},
+      #{m.couponType},
+      #{m.startTime},
+      #{m.endTime},
+      #{m.status},
+      #{m.source},
+      #{m.sourceId},
+      #{m.userType},
+      #{m.userId},
+      #{m.deviceMac},
+      #{m.createUserid},
+      #{m.createUsername},
+      #{m.createTime},
+      #{m.updateUserid},
+      #{m.updateUsername},
+      #{m.updateTime},
+      #{m.versionNo},
+      #{m.isDeleted}
+      )
+    </foreach>
+  </insert>
+
+  <select id="selectByCouponQueryBo" parameterType="com.fcb.coupon.backend.model.bo.CouponQueryWrapperBo">
+    select
+    <include refid="Base_Column_List" />
+     from ${tableName}
+     where is_deleted = 0
+    <if test="param.id != null">
+      and id = #{param.id}
+    </if>
+    <if test="param.couponThemeId != null">
+      and coupon_theme_id = #{param.couponThemeId}
+    </if>
+    <if test="param.userType != null">
+      and user_type = #{param.userType}
+    </if>
+    <if test="param.createTimeStart != null">
+      and create_time &gt;= #{param.createTimeStart}
+    </if>
+    <if test="param.createTimeEnd != null">
+      and create_time &lt;= #{param.createTimeEnd}
+    </if>
+     order by id desc
+    <if test="param.offset != null and param.pageSize != null">
+      limit #{param.offset}, #{param.pageSize}
+    </if>
+  </select>
+
+
+</mapper>

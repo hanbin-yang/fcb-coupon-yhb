@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fcb.coupon.backend.mapper.CouponUserMapper">
+
+  <resultMap id="TotalResultMap" type="com.fcb.coupon.backend.model.dto.CouponUserTotalDto">
+    <result column="user_id" jdbcType="VARCHAR" property="userId" />
+    <result column="total" jdbcType="INTEGER" property="total" />
+  </resultMap>
+
+  <resultMap id="SendedAndUsedCouponsDtoMap" type="com.fcb.coupon.backend.model.dto.SendedAndUsedCouponDto">
+    <result property="couponThemeId" column="coupon_theme_id" jdbcType="BIGINT"/>
+    <result property="total" column="total" jdbcType="INTEGER"/>
+    <result property="status" column="STATUS" jdbcType="INTEGER"/>
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    coupon_id, coupon_theme_id, status, user_type, user_id, bind_tel, end_time, create_time
+  </sql>
+
+  <insert id="batchSave">
+    insert into coupon_user
+    (
+    <include refid="Base_Column_List" />
+    )
+    values
+    <foreach collection="list" item="m" separator=",">
+      (
+      #{m.couponId},
+      #{m.couponThemeId},
+      #{m.status},
+      #{m.userType},
+      #{m.userId},
+      #{m.bindTel},
+      #{m.endTime},
+      #{m.createTime}
+      )
+    </foreach>
+  </insert>
+
+
+
+  <!-- 统计已经发放，已经使用的券张数 -->
+  <select id="countSendedAndUsedCoupons" parameterType="java.util.HashMap" resultMap="SendedAndUsedCouponsDtoMap">
+    SELECT
+    coupon_theme_id,
+    status,
+    count(*) total
+    FROM
+    coupon_user
+    WHERE
+    coupon_theme_id IN
+    <foreach collection="couponThemeIds" item="item" separator="," close=")" open="(">
+      #{item}
+    </foreach>
+    AND status = #{status}
+    GROUP BY
+    coupon_theme_id
+  </select>
+
+</mapper>

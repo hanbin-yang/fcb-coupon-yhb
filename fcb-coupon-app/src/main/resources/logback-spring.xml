@@ -1,0 +1,252 @@
+<!-- Logback configuration. See http://logback.qos.ch/manual/index.html -->
+<configuration scan="true" scanPeriod="10 seconds">
+    <springProperty scope="context" name="app.name" source="spring.application.name"/>
+    <springProperty scope="context" name="profiles.active" source="spring.profiles.active"/>
+    <contextName>${app.name}</contextName>
+
+    <!-- 控制台 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <charset>UTF-8</charset>
+            <layout class="org.apache.skywalking.apm.toolkit.log.logback.v1.x.TraceIdPatternLogbackLayout">
+                <!--logger{36}包名缩略，logger{96}包名全路径 tid为skywalking的id，只有配置了agent才会生成，traceId为业务跟踪id -->
+                <pattern>[%date] [%highlight(%level)] [%thread] [%green(%logger{36}:%line)] - [%tid] - %X{traceId} - %msg%n</pattern>
+            </layout>
+        </encoder>
+    </appender>
+
+    <!-- 时间滚动输出 level为 DEBUG 日志 -->
+    <appender name="DEBUG_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 正在记录的日志文件的路径及文件名 -->
+        <file>${LOG_PATH}/log_debug.log</file>
+        <!--日志文件输出格式-->
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <charset>UTF-8</charset>
+            <layout class="org.apache.skywalking.apm.toolkit.log.logback.v1.x.TraceIdPatternLogbackLayout">
+                <!--logger{36}包名缩略，logger{96}包名全路径-->
+                <pattern>[%date] [%level] [%thread] [%logger{36}:%line] - [%tid] - %X{traceId} - %msg%n</pattern>
+            </layout>
+        </encoder>
+        <!-- 日志记录器的滚动策略，按日期，按大小记录 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--
+                归档的日志文件的路径，例如今天是2017-04-26日志，当前写的日志文件路径为file节点指定，可以将此文件与file指定文件路径设置为不同路径，从而将当前日志文件或归档日志文件置不同的目录。
+                而2017-04-26的日志文件在由fileNamePattern指定。%d{yyyy-MM-dd}指定日期格式，%i指定索引
+            -->
+            <fileNamePattern>${LOG_PATH}/debug/log-debug-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!--
+                除按日志记录之外，还配置了日志文件不能超过500M，若超过500M，日志文件会以索引0开始，
+                命名日志文件，例如log-error-2017-04-26.0.log
+            -->
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <!--日志文件保留天数-->
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <!-- 此日志文件只记录debug级别的 -->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>debug</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <!-- 时间滚动输出 level为 INFO 日志 -->
+    <appender name="INFO_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 正在记录的日志文件的路径及文件名 -->
+        <file>${LOG_PATH}/log_info.log</file>
+        <!--日志文件输出格式-->
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <charset>UTF-8</charset>
+            <layout class="org.apache.skywalking.apm.toolkit.log.logback.v1.x.TraceIdPatternLogbackLayout">
+                <!--logger{36}包名缩略，logger{96}包名全路径-->
+                <pattern>[%date] [%level] [%thread] [%logger{36}:%line] - [%tid] - %X{traceId} - %msg%n</pattern>
+            </layout>
+        </encoder>
+        <!-- 日志记录器的滚动策略，按日期，按大小记录 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--
+                归档的日志文件的路径，例如今天是2017-04-26日志，当前写的日志文件路径为file节点指定，可以将此文件与file指定文件路径设置为不同路径，从而将当前日志文件或归档日志文件置不同的目录。
+                而2017-04-26的日志文件在由fileNamePattern指定。%d{yyyy-MM-dd}指定日期格式，%i指定索引
+            -->
+            <fileNamePattern>${LOG_PATH}/info/log-info-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!--
+                除按日志记录之外，还配置了日志文件不能超过500M，若超过500M，日志文件会以索引0开始，
+                命名日志文件，例如log-error-2017-04-26.0.log
+            -->
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <!--日志文件保留天数-->
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <!-- 此日志文件只记录info级别的 -->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>info</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <!-- 时间滚动输出 level为 WARN 日志 -->
+    <appender name="WARN_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 正在记录的日志文件的路径及文件名 -->
+        <file>${LOG_PATH}/log_warn.log</file>
+        <!--日志文件输出格式-->
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <charset>UTF-8</charset>
+            <layout class="org.apache.skywalking.apm.toolkit.log.logback.v1.x.TraceIdPatternLogbackLayout">
+                <!--logger{36}包名缩略，logger{96}包名全路径-->
+                <pattern>[%date] [%level] [%thread] [%logger{36}:%line] - [%tid] - %X{traceId} - %msg%n</pattern>
+            </layout>
+        </encoder>
+        <!-- 日志记录器的滚动策略，按日期，按大小记录 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--
+                归档的日志文件的路径，例如今天是2017-04-26日志，当前写的日志文件路径为file节点指定，可以将此文件与file指定文件路径设置为不同路径，从而将当前日志文件或归档日志文件置不同的目录。
+                而2017-04-26的日志文件在由fileNamePattern指定。%d{yyyy-MM-dd}指定日期格式，%i指定索引
+            -->
+            <fileNamePattern>${LOG_PATH}/warn/log-warn-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!--
+                除按日志记录之外，还配置了日志文件不能超过500M，若超过500M，日志文件会以索引0开始，
+                命名日志文件，例如log-error-2017-04-26.0.log
+            -->
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <!--日志文件保留天数-->
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <!-- 此日志文件只记录warn级别的 -->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>warn</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <!-- 时间滚动输出 level为 ERROR 日志 -->
+    <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <!-- 正在记录的日志文件的路径及文件名 -->
+        <file>${LOG_PATH}/log_error.log</file>
+        <!--日志文件输出格式-->
+        <encoder class="ch.qos.logback.core.encoder.LayoutWrappingEncoder">
+            <charset>UTF-8</charset>
+            <layout class="org.apache.skywalking.apm.toolkit.log.logback.v1.x.TraceIdPatternLogbackLayout">
+                <!--logger{36}包名缩略，logger{96}包名全路径-->
+                <pattern>[%date] [%level] [%thread] [%logger{36}:%line] - [%tid] - %X{traceId} - %msg%n</pattern>
+            </layout>
+        </encoder>
+        <!-- 日志记录器的滚动策略，按日期，按大小记录 -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!--
+                归档的日志文件的路径，例如今天是2017-04-26日志，当前写的日志文件路径为file节点指定，可以将此文件与file指定文件路径设置为不同路径，从而将当前日志文件或归档日志文件置不同的目录。
+                而2017-04-26的日志文件在由fileNamePattern指定。%d{yyyy-MM-dd}指定日期格式，%i指定索引
+            -->
+            <fileNamePattern>${LOG_PATH}/error/log-error-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!--
+                除按日志记录之外，还配置了日志文件不能超过500M，若超过500M，日志文件会以索引0开始，
+                命名日志文件，例如log-error-2017-04-26.0.log
+            -->
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>100MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+            <!--日志文件保留天数-->
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <!-- 此日志文件只记录ERROR级别的 -->
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>error</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+
+    <!-- 输出到Kafka，Kafka不可用有卡死问题 -->
+    <appender name="ALL_KAFKA" class="com.github.danielwegener.logback.kafka.KafkaAppender">
+        <encoder>
+            <pattern>[%date] [%level] [%thread] [%logger{36}:%line] - [%tid] - %X{traceId} - %msg%n</pattern>
+        </encoder>
+        <topic>logs</topic>
+        <keyingStrategy class="com.github.danielwegener.logback.kafka.keying.NoKeyKeyingStrategy"/>
+        <deliveryStrategy class="com.github.danielwegener.logback.kafka.delivery.AsynchronousDeliveryStrategy"/>
+        <!-- <partition>0</partition> -->
+        <producerConfig>bootstrap.servers=localhost:9092</producerConfig>
+        <!--kafka不可用降级使用-->
+        <appender-ref ref="CONSOLE"/>
+    </appender>
+
+    <appender name="DEBUG_FILE_ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+        <!--放入队列时如果缓冲队列已满是否阻塞,true为阻塞-->
+        <neverBlock>true</neverBlock>
+        <!--是否包含堆栈信息-->
+        <includeCallerData>true</includeCallerData>AsyncAppender
+        <!--缓冲队列剩余多少时丢弃消息-->
+        <discardingThreshold>0</discardingThreshold>
+        <!--缓冲队列大小-->
+        <queueSize>2048</queueSize>
+        <!--父appender-->
+        <appender-ref ref="DEBUG_FILE"/>
+    </appender>
+
+    <appender name="INFO_FILE_ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+        <!--放入队列时如果缓冲队列已满是否阻塞,true为阻塞-->
+        <neverBlock>true</neverBlock>
+        <!--是否包含堆栈信息-->
+        <includeCallerData>true</includeCallerData>AsyncAppender
+        <!--缓冲队列剩余多少时丢弃消息-->
+        <discardingThreshold>0</discardingThreshold>
+        <!--缓冲队列大小-->
+        <queueSize>2048</queueSize>
+        <!--父appender-->
+        <appender-ref ref="INFO_FILE"/>
+    </appender>
+
+    <appender name="WARN_FILE_ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+        <!--放入队列时如果缓冲队列已满是否阻塞,true为阻塞-->
+        <neverBlock>true</neverBlock>
+        <!--是否包含堆栈信息-->
+        <includeCallerData>true</includeCallerData>AsyncAppender
+        <!--缓冲队列剩余多少时丢弃消息-->
+        <discardingThreshold>0</discardingThreshold>
+        <!--缓冲队列大小-->
+        <queueSize>2048</queueSize>
+        <!--父appender-->
+        <appender-ref ref="WARN_FILE"/>
+    </appender>
+
+    <appender name="ERROR_FILE_ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+        <!--放入队列时如果缓冲队列已满是否阻塞,true为阻塞-->
+        <neverBlock>true</neverBlock>
+        <!--是否包含堆栈信息-->
+        <includeCallerData>true</includeCallerData>AsyncAppender
+        <!--缓冲队列剩余多少时丢弃消息-->
+        <discardingThreshold>0</discardingThreshold>
+        <!--缓冲队列大小-->
+        <queueSize>2048</queueSize>
+        <!--父appender-->
+        <appender-ref ref="ERROR_FILE"/>
+    </appender>
+
+
+    <springProfile name="dev,sit,sit2">
+        <root level="debug">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="DEBUG_FILE_ASYNC"/>
+            <appender-ref ref="INFO_FILE_ASYNC"/>
+            <appender-ref ref="WARN_FILE_ASYNC"/>
+            <appender-ref ref="ERROR_FILE_ASYNC"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="uat,uat2,prod">
+        <root level="info">
+            <appender-ref ref="INFO_FILE_ASYNC"/>
+            <appender-ref ref="WARN_FILE_ASYNC"/>
+            <appender-ref ref="ERROR_FILE_ASYNC"/>
+        </root>
+    </springProfile>
+
+
+</configuration>

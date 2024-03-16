@@ -1,0 +1,29 @@
+package com.fcb.coupon.backend.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.fcb.coupon.backend.model.bo.CouponQueryWrapperBo;
+import com.fcb.coupon.backend.model.entity.CouponEntity;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
+
+/**
+ * <p>
+ * 劵表 Mapper 接口
+ * </p>
+ *
+ * @author 自动生成
+ * @since 2021-06-11
+ */
+public interface CouponMapper extends BaseMapper<CouponEntity> {
+
+    void insertBatch(List<CouponEntity> couponEntityList);
+
+    /**
+     * 动态表查询券
+     * @param tableName     券表名
+     * @param param         参数
+     * @return
+     */
+    List<CouponEntity> selectByCouponQueryBo(@Param("tableName")String tableName, @Param("param")CouponQueryWrapperBo param);
+}

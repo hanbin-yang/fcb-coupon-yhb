@@ -1,0 +1,9 @@
+${AnsiColor.GREEN}________     ______
+___  __/________  /_       ________________  ______________________________
+__  /_ _  ___/_  __ \_______  ___/  __ \  / / /__  __ \  __ \_  __ \_  ___/
+_  __/ / /__ _  /_/ //_____/ /__ / /_/ / /_/ /__  /_/ / /_/ /  / / /(__  )
+/_/    \___/ /_.___/       \___/ \____/\__,_/ _  .___/\____//_/ /_//____/
+                                              /_/
+${AnsiColor.GREEN} ::   Environment    ::        ${AnsiColor.DEFAULT}${AnsiStyle.FAINT}(${spring.profiles.active})
+${AnsiColor.GREEN} :: Application Name ::        ${AnsiColor.DEFAULT}${AnsiStyle.FAINT}(${spring.application.name})
+${AnsiColor.GREEN} ::   Spring Boot    ::        ${AnsiColor.DEFAULT}${AnsiStyle.FAINT}${spring-boot.formatted-version}

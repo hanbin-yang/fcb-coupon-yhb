@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fcb.coupon.backend.mapper.CouponThemeStatisticMapper">
+    <resultMap id="BaseResultMap" type="com.fcb.coupon.backend.model.entity.CouponThemeStatisticEntity">
+        <id column="coupon_theme_id" jdbcType="BIGINT" property="couponThemeId"/>
+        <result column="total_count" jdbcType="INTEGER" property="totalCount"/>
+        <result column="created_count" jdbcType="INTEGER" property="createdCount"/>
+        <result column="sended_count" jdbcType="INTEGER" property="sendedCount"/>
+        <result column="create_time" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="update_time" jdbcType="TIMESTAMP" property="updateTime"/>
+        <result column="version_no" jdbcType="INTEGER" property="versionNo"/>
+        <result column="is_deleted" jdbcType="TINYINT" property="isDeleted"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        coupon_theme_id, total_count, created_count, sended_count, create_time, update_time,
+        version_no, is_deleted
+    </sql>
+    <update id="incrCreateCountById">
+        update coupon_theme_statistic
+        set created_count = created_count + #{generateCount},update_time=now()
+        where coupon_theme_id = #{couponThemeId}
+    </update>
+
+    <update id="updateSendedCount">
+        update coupon_theme_statistic
+        set sended_count = sended_count + #{sendedCount},update_time=now()
+        where is_deleted=0
+        and coupon_theme_id = #{couponThemeId}
+        and created_count >= sended_count + #{sendedCount}
+    </update>
+</mapper>

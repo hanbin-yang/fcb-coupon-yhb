@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fcb.coupon.backend.mapper.MktUseRuleMapper">
+  <resultMap id="BaseResultMap" type="com.fcb.coupon.backend.model.entity.MktUseRuleEntity">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="rule_type" jdbcType="INTEGER" property="ruleType" />
+    <result column="limit_ref" jdbcType="BIGINT" property="limitRef" />
+    <result column="ref_description" jdbcType="VARCHAR" property="refDescription" />
+    <result column="extend_ref" jdbcType="VARCHAR" property="extendRef" />
+    <result column="theme_ref" jdbcType="BIGINT" property="themeRef" />
+    <result column="create_userid" jdbcType="BIGINT" property="createUserid" />
+    <result column="create_username" jdbcType="VARCHAR" property="createUsername" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_userid" jdbcType="BIGINT" property="updateUserid" />
+    <result column="update_username" jdbcType="VARCHAR" property="updateUsername" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="version_no" jdbcType="INTEGER" property="versionNo" />
+    <result column="is_deleted" jdbcType="TINYINT" property="isDeleted" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, rule_type, limit_ref,
+    ref_description, extend_ref, theme_ref,
+    create_userid, create_username, create_time,
+    update_userid, update_username, update_time,
+    version_no, is_deleted
+  </sql>
+  <sql id="listMktUseRule_where">
+    <if test="themeRef != null">AND
+      theme_ref = #{themeRef}
+    </if>
+    <if test="merchantId != null">AND
+      limit_ref = #{merchantId}
+    </if>
+    <if test="merchantIds != null and merchantIds.size > 0">AND
+      limit_ref IN
+      <foreach collection="merchantIds" item="item" separator="," close=")" open="(">
+        #{item}
+      </foreach>
+    </if>
+    <if test="storeIds != null and storeIds.size > 0">AND
+      limit_ref IN
+      <foreach collection="storeIds" item="item" separator="," close=")" open="(">
+        #{item}
+      </foreach>
+    </if>
+    <if test="buildCode != null and buildCode != ''">AND
+      extend_ref = #{buildCode}
+    </if>
+    <if test="merchantCode != null and merchantCode != ''">AND
+      extend_ref = #{merchantCode}
+    </if>
+    <if test="merchantName != null and merchantName != ''">AND
+      ref_description LIKE CONCAT('%',#{merchantName},'%')
+    </if>
+    <if test="ruleTypeList != null and ruleTypeList.size > 0">AND
+       rule_type IN
+      <foreach collection="ruleTypeList" item="item" separator="," close=")" open="(">
+        #{item}
+      </foreach>
+    </if>
+
+  </sql>
+  <sql id="getMktUseRuleByIds_where">
+    <if test="themeRef != null">AND
+      theme_ref = #{themeRef}
+    </if>
+    <if test="merchantId != null">AND
+      limit_ref = #{merchantId}
+    </if>
+    <if test="merchantIds != null and merchantIds.size > 0">AND
+      limit_ref IN
+      <foreach collection="merchantIds" item="item" separator="," close=")" open="(">
+        #{item}
+      </foreach>
+    </if>
+    <if test="storeIds != null and storeIds.size > 0">AND
+      limit_ref IN
+      <foreach collection="storeIds" item="item" separator="," close=")" open="(">
+        #{item}
+      </foreach>
+    </if>
+    <if test="buildCode != null and buildCode != ''">AND
+      extend_ref = #{buildCode}
+    </if>
+    <if test="merchantCode != null and merchantCode != ''">AND
+      extend_ref = #{merchantCode}
+    </if>
+    <if test="merchantName != null and merchantName != ''">AND
+      ref_description LIKE CONCAT('%',#{merchantName},'%')
+    </if>
+    <if test="ruleTypeList != null and ruleTypeList.size > 0">AND
+      rule_type IN
+      <foreach collection="ruleTypeList" item="item" separator="," close=")" open="(">
+        #{item}
+      </foreach>
+    </if>
+
+  </sql>
+  <sql id="getSelectedSelectionList_where">
+    <if test="themeRef != null">AND
+      theme_ref = #{themeRef}
+    </if>
+    <if test="limitRef != null and limitRef != ''">AND
+      limit_ref = #{limitRef}
+    </if>
+    <if test="ruleType != null and ruleType != ''">AND
+      rule_type = #{ruleType}
+    </if>
+    <if test="extendRef != null and extendRef != ''">AND
+      extend_ref LIKE CONCAT('%',#{extendRef},'%')
+    </if>
+    <if test="refDescription != null and refDescription != ''">AND
+      ref_description LIKE CONCAT('%',#{refDescription},'%')
+    </if>
+
+  </sql>
+  <insert id="insertBatch">
+    insert into mkt_use_rule
+    (
+    <include refid="Base_Column_List" />
+    )
+    values
+    <foreach collection="list" item="m" separator=",">
+      (
+      #{m.id},#{m.ruleType},#{m.limitRef},
+      #{m.refDescription},#{m.extendRef},#{m.themeRef},
+      #{m.createUserid},#{m.createUsername},#{m.createTime},
+      #{m.updateUserid},#{m.updateUsername},#{m.updateTime},
+      #{m.versionNo},#{m.isDeleted}
+      )
+    </foreach>
+  </insert>
+
+  <select id="listMktUseRule" resultType="com.fcb.coupon.backend.model.entity.MktUseRuleEntity" parameterType="com.fcb.coupon.backend.model.dto.MktUseRuleOrgListDto">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM mkt_use_rule WHERE 1=1
+    <include refid="listMktUseRule_where"/>
+    ORDER BY id DESC
+    <if test="itemsPerPage != null and itemsPerPage != -1">
+      <if test="startItem != null">
+        LIMIT #{startItem}, #{itemsPerPage}
+      </if>
+      <if test="startItem == null">
+        LIMIT #{itemsPerPage}
+      </if>
+    </if>
+  </select>
+  <select id="listMktUseRuleCount" resultType="java.lang.Integer" parameterType="com.fcb.coupon.backend.model.dto.MktUseRuleOrgListDto">
+    SELECT count(*) FROM mkt_use_rule  WHERE is_deleted = 0
+    <include refid="listMktUseRule_where"/>
+  </select>
+
+  <select id="getMktUseRuleByIds" resultType="com.fcb.coupon.backend.model.entity.MktUseRuleEntity" parameterType="com.fcb.coupon.backend.model.dto.MktUseRuleByIdsDto">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM mkt_use_rule  WHERE is_deleted = 0
+    <include refid="getMktUseRuleByIds_where"/>
+    ORDER BY id DESC
+    <if test="itemsPerPage != null and itemsPerPage != -1">
+      <if test="startItem != null">
+        LIMIT #{startItem}, #{itemsPerPage}
+      </if>
+      <if test="startItem == null">
+        LIMIT #{itemsPerPage}
+      </if>
+    </if>
+  </select>
+  <select id="getMktUseRuleByIdsCount" resultType="java.lang.Integer" parameterType="com.fcb.coupon.backend.model.dto.MktUseRuleByIdsDto">
+    SELECT count(*) FROM mkt_use_rule  WHERE is_deleted = 0
+    <include refid="getMktUseRuleByIds_where"/>
+  </select>
+
+  <select id="getSelectedSelectionListCount" resultType="java.lang.Integer" parameterType="com.fcb.coupon.backend.model.dto.MktUseRuleSelectionDto">
+    SELECT count(*) FROM mkt_use_rule  WHERE is_deleted = 0
+    <include refid="getSelectedSelectionList_where"/>
+  </select>
+  <select id="getSelectedSelectionList" resultType="com.fcb.coupon.backend.model.entity.MktUseRuleEntity" parameterType="com.fcb.coupon.backend.model.dto.MktUseRuleSelectionDto">
+    SELECT
+    <include refid="Base_Column_List"/>
+    FROM mkt_use_rule  WHERE is_deleted = 0
+    <include refid="getSelectedSelectionList_where"/>
+    ORDER BY id DESC
+    <if test="itemsPerPage != null and itemsPerPage != -1">
+      <if test="startItem != null">
+        LIMIT #{startItem}, #{itemsPerPage}
+      </if>
+      <if test="startItem == null">
+        LIMIT #{itemsPerPage}
+      </if>
+    </if>
+  </select>
+</mapper>

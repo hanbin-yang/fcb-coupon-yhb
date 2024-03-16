@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fcb.coupon.app.mapper.CouponMapper">
+
+  <sql id="Base_Column_List">
+    id,
+    coupon_theme_id,
+    coupon_discount_type,
+    coupon_value,
+    coupon_code,
+    theme_title,
+    coupon_type,
+    start_time,
+    end_time,
+    `status`,
+    `source`,
+    source_id,
+    user_type,
+    user_id,
+    device_mac,
+    create_userid,
+    create_username,
+    create_time,
+    update_userid,
+    update_username,
+    update_time,
+    version_no,
+    is_deleted
+  </sql>
+
+</mapper>

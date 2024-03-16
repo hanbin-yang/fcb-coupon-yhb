@@ -1,0 +1,16 @@
+spring:
+  cloud:
+    nacos:
+      config:
+        server-addr: https://nacos-sit2.fcb.com.cn
+        file-extension: yml
+        namespace: fcb-coupon
+        ext-config:
+          - dataId: '${spring.application.name}-page-info-${spring.profiles.active}.yml'
+            refresh: true
+          - dataId: 'fcb-coupon-common-${spring.profiles.active}.yml'
+            refresh: true
+      discovery:
+        server-addr: https://nacos-sit2.fcb.com.cn
+        enabled: true
+        register-enabled: true

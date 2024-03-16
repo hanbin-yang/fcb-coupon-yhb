@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fcb.coupon.backend.mapper.CouponThemeMapper">
+ 
+    <sql id="Base_Column_List">
+        ct.id, ct.activity_name, ct.theme_title, ct.start_time, ct.end_time, ct.status, ct.theme_type, ct.coupon_type, ct.coupon_give_rule, ct.coupon_discount_type,
+        ct.applicable_user_types, ct.theme_desc, ct.discount_amount, ct.discount_value, ct.can_donation, ct.can_transfer, ct.individual_limit, ct.create_time, ct.use_limit,
+        ct.order_use_limit, ct.coupon_pic_url, ct.eff_date_calc_method, ct.eff_date_start_time, ct.eff_date_end_time, ct.eff_date_days, ct.every_day_limit, ct.every_month_limit,
+        ct.remark, ct.belonging_org_id, ct.create_userid, ct.create_username, ct.update_userid, ct.update_username, ct.update_time, ct.version_no, ct.is_deleted
+    </sql>
+    <sql id="common_status">
+        <if test="status != null">
+            <if test="status == 0">AND
+                ct.status = #{status}
+            </if>
+            <if test="status == 1">AND
+                ct.status = #{status}
+            </if>
+            <if test="status == 2">AND
+                ct.status = 4 and NOW() &lt; ct.start_time
+            </if>
+            <if test="status == 3">AND
+                ct.status = #{status}
+            </if>
+            <if test="status == 4">AND
+                ct.status = 4 and NOW() &gt;= ct.start_time and NOW() &lt;= ct.end_time
+            </if>
+            <if test="status == 5">AND
+                ct.status = 4 and NOW() &gt; ct.end_time
+            </if>
+            <if test="status == 6">AND
+                ct.status = #{status}
+            </if>
+        </if>
+    </sql>
+    <sql id="common_columm_where">
+        <if test="id != null">AND
+            ct.id = #{id}
+        </if>
+        <if test="couponType != null">AND
+            ct.coupon_type = #{couponType}
+        </if>
+        <if test="themeTitle != null and themeTitle != ''">AND
+            ct.theme_title LIKE CONCAT('%',#{themeTitle},'%')
+        </if>
+        <if test="activityName != null and activityName != ''">AND
+            ct.activity_name LIKE CONCAT('%',#{activityName},'%')
+        </if>
+        <if test="startTime != null">AND
+            ct.end_time &gt; #{startTime}
+        </if>
+        <if test="endTime != null">AND
+            ct.start_time &lt; #{endTime}
+        </if>
+    </sql>
+    <sql id="listCouponTheme_where">
+
+        <include refid="common_status"/>
+
+        <include refid="common_columm_where"/>
+
+        <if test="orgIdList != null and orgIdList.size > 0">AND
+            exists (SELECT 1 FROM coupon_theme_org cto WHERE cto.org_id IN
+            <foreach collection="orgIdList" item="item" separator="," close=")" open="(">
+                #{item}
+            </foreach>
+            AND cto.coupon_theme_id = ct.id AND cto.is_deleted = 0)
+        </if>
+        <if test="couponGiveRule != null">AND
+            ct.coupon_give_rule = #{couponGiveRule}
+        </if>
+        <if test="applicableUserTypes != null">AND
+            JSON_CONTAINS(applicable_user_types->'$.ids',JSON_ARRAY(#{applicableUserTypes}))
+        </if>
+    </sql>
+    <sql id="listPositionMarketingCouponTheme_where">
+        <if test="status != null">
+            <if test="status == 24">AND
+                ((ct.status = 4 AND NOW() &lt; ct.start_time) OR (ct.status = 4 AND NOW() &gt;= ct.start_time AND NOW() &lt;= ct.end_time))
+            </if>
+        </if>
+        <if test="ids != null and ids.size > 0">AND
+            ct.id IN
+            <foreach collection="ids" item="item" separator="," close=")" open="(">
+                #{item}
+            </foreach>
+        </if>
+        <if test="themeTitle != null and themeTitle != ''">AND
+            ct.theme_title LIKE CONCAT('%',#{themeTitle},'%')
+        </if>
+        <if test="orgIdList != null and orgIdList.size > 0">AND
+            exists (SELECT 1 FROM coupon_theme_org cto WHERE cto.org_id IN
+            <foreach collection="orgIdList" item="item" separator="," close=")" open="(">
+                #{item}
+            </foreach>
+            AND cto.coupon_theme_id = ct.id AND cto.is_deleted = 0)
+        </if>
+        <if test="couponGiveRule != null">AND
+            ct.coupon_give_rule = #{couponGiveRule}
+        </if>
+        <if test="applicableUserTypes != null and applicableUserTypes.size > 0">AND
+            JSON_CONTAINS(applicable_user_types->'$.ids',JSON_ARRAY
+            <foreach collection="applicableUserTypes" item="item" separator="," open="(" close="))">
+                #{item}
+            </foreach>
+        </if>
+
+        <if test="rangeRuleType != null and rangeRuleType == 0">
+            AND
+            (
+            ct.theme_type = 0
+            <if test="rangeStoreIdList != null and rangeStoreIdList.size > 0">
+                OR
+                <foreach collection="rangeStoreIdList" item="item" separator="and" open="(" close=")">
+                    exists (SELECT 1 FROM `mkt_use_rule` mkr WHERE mkr.ref_type = 0 AND mkr.theme_ref = ct.id AND mkr.is_deleted = 0 AND mkr.`rule_type` = 6 AND mkr.`limit_ref` = #{item})
+                </foreach>
+            </if>
+
+            <if test="rangeMerchantIdList != null and rangeMerchantIdList.size > 0">
+                OR
+                <foreach collection="rangeMerchantIdList" item="item" separator="and" open="(" close=")">
+                    exists (SELECT 1 FROM `mkt_use_rule` mkr WHERE
+                    mkr.ref_type = 0 AND mkr.theme_ref = ct.id AND mkr.is_deleted = 0 AND mkr.`rule_type` = 1 AND mkr.`limit_ref` = #{item}
+                    )
+                </foreach>
+            </if>
+
+            <if test="rangeGroupIdList != null and rangeGroupIdList.size > 0">
+                OR
+                <foreach collection="rangeGroupIdList" item="item" separator="and" open="(" close=")">
+                    exists (SELECT 1 FROM `mkt_use_rule` mkr WHERE mkr.ref_type = 0 AND mkr.theme_ref = ct.id AND mkr.is_deleted = 0 AND mkr.`rule_type` = 11 AND mkr.`limit_ref` = #{item})
+                </foreach>
+            </if>
+            )
+        </if>
+    </sql>
+    <sql id="listInitiativeMarketingCouponTheme_where">
+        <if test="status != null">
+            <if test="status == 4">AND
+                ct.status = 4 and NOW() &gt;= ct.start_time and NOW() &lt;= ct.end_time
+            </if>
+        </if>
+
+        <if test="id != null">AND
+            ct.id = #{id}
+        </if>
+        <if test="themeTitle != null and themeTitle != ''">AND
+            ct.theme_title LIKE CONCAT('%',#{themeTitle},'%')
+        </if>
+        <if test="orgIdList != null and orgIdList.size > 0">AND
+            exists (SELECT 1 FROM coupon_theme_org cto WHERE cto.org_id IN
+            <foreach collection="orgIdList" item="item" separator="," close=")" open="(">
+                #{item}
+            </foreach>
+            AND cto.coupon_theme_id = ct.id AND cto.is_deleted = 0)
+        </if>
+        <if test="couponGiveRule != null">AND
+            ct.coupon_give_rule = #{couponGiveRule}
+        </if>
+        <if test="applicableUserTypes != null and applicableUserTypes.size > 0">AND
+            JSON_CONTAINS(applicable_user_types->'$.ids',JSON_ARRAY
+            <foreach collection="applicableUserTypes" item="item" separator="," open="(" close="))">
+                #{item}
+            </foreach>
+        </if>
+    </sql>
+    <sql id="listExportCouponTheme_where">
+
+        <include refid="common_status"/>
+
+        <include refid="common_columm_where"/>
+
+        <if test="orgIdList != null and orgIdList.size > 0">AND
+            exists (SELECT 1 FROM coupon_theme_org cto WHERE cto.org_id IN
+            <foreach collection="orgIdList" item="item" separator="," close=")" open="(">
+                #{item}
+            </foreach>
+            AND cto.coupon_theme_id = ct.id AND cto.is_deleted = 0)
+        </if>
+        <if test="couponGiveRule != null">AND
+            ct.coupon_give_rule = #{couponGiveRule}
+        </if>
+        <if test="crowdScopeId != null">AND
+            JSON_CONTAINS(applicable_user_types->'$.ids',JSON_ARRAY(#{crowdScopeId}))
+        </if>
+    </sql>
+    <sql id="listActivityPageCouponTheme_where">
+
+        <include refid="common_status"/>
+
+        <include refid="common_columm_where"/>
+
+        <if test="orgIdList != null and orgIdList.size > 0">AND
+            exists (SELECT 1 FROM coupon_theme_org cto WHERE cto.org_id IN
+            <foreach collection="orgIdList" item="item" separator="," close=")" open="("> #{item}</foreach>
+            AND cto.coupon_theme_id = ct.id AND cto.is_deleted = 0)
+        </if>
+        <if test="couponGiveRule != null">AND
+            ct.coupon_give_rule = #{couponGiveRule}
+        </if>
+        <if test="crowdScopeId != null">AND
+            JSON_CONTAINS(applicable_user_types->'$.ids',JSON_ARRAY(#{crowdScopeId}))
+        </if>
+    </sql>
+    <select id="listCouponTheme" parameterType="com.fcb.coupon.backend.model.dto.CouponThemeListDo" resultType="com.fcb.coupon.backend.model.entity.CouponThemeEntity">
+        SELECT <include refid="Base_Column_List"/> FROM `coupon_theme` ct
+        WHERE ct.is_deleted = 0
+
+        <include refid="listCouponTheme_where"/>
+
+        ORDER BY ct.create_time DESC
+
+        <if test="itemsPerPage != null and itemsPerPage != -1">
+            <if test="startItem != null">
+                LIMIT #{startItem}, #{itemsPerPage}
+            </if>
+            <if test="startItem == null">
+                LIMIT #{itemsPerPage}
+            </if>
+        </if>
+    </select>
+
+    <select id="listCouponThemeCount" parameterType="com.fcb.coupon.backend.model.dto.CouponThemeListDo" resultType="java.lang.Integer">
+        SELECT count(*) FROM `coupon_theme` ct
+        WHERE ct.is_deleted = 0
+
+        <include refid="listCouponTheme_where"/>
+    </select>
+
+    <select id="listPositionMarketingCouponTheme" parameterType="com.fcb.coupon.backend.model.dto.CouponThemePositionMarketingDo" resultType="com.fcb.coupon.backend.model.entity.CouponThemeEntity">
+        SELECT <include refid="Base_Column_List"/> FROM `coupon_theme` ct
+        WHERE ct.is_deleted = 0
+
+        <include refid="listPositionMarketingCouponTheme_where"/>
+
+        ORDER BY ct.create_time DESC
+
+        <if test="itemsPerPage != null and itemsPerPage != -1">
+            <if test="startItem != null">
+                LIMIT #{startItem}, #{itemsPerPage}
+            </if>
+            <if test="startItem == null">
+                LIMIT #{itemsPerPage}
+            </if>
+        </if>
+    </select>
+
+    <select id="listPositionMarketingCouponThemeCount" parameterType="com.fcb.coupon.backend.model.dto.CouponThemePositionMarketingDo" resultType="java.lang.Integer">
+        SELECT count(*) FROM `coupon_theme` ct
+        WHERE ct.is_deleted = 0
+
+        <include refid="listPositionMarketingCouponTheme_where"/>
+    </select>
+
+    <select id="listInitiativeMarketingCouponTheme" parameterType="com.fcb.coupon.backend.model.dto.CouponThemeInitiativeMarketingDo" resultType="com.fcb.coupon.backend.model.entity.CouponThemeEntity">
+        SELECT <include refid="Base_Column_List"/> FROM `coupon_theme` ct
+        WHERE ct.is_deleted = 0
+
+        <include refid="listInitiativeMarketingCouponTheme_where"/>
+
+        ORDER BY ct.create_time DESC
+
+        <if test="itemsPerPage != null and itemsPerPage != -1">
+            <if test="startItem != null">
+                LIMIT #{startItem}, #{itemsPerPage}
+            </if>
+            <if test="startItem == null">
+                LIMIT #{itemsPerPage}
+            </if>
+        </if>
+    </select>
+
+    <select id="listInitiativeMarketingCouponThemeCount" parameterType="com.fcb.coupon.backend.model.dto.CouponThemeInitiativeMarketingDo" resultType="java.lang.Integer">
+        SELECT count(*) FROM `coupon_theme` ct
+        WHERE ct.is_deleted = 0
+
+        <include refid="listInitiativeMarketingCouponTheme_where"/>
+    </select>
+
+    <select id="listExportCouponTheme" parameterType="com.fcb.coupon.backend.model.dto.CouponThemeExportDo" resultType="com.fcb.coupon.backend.model.entity.CouponThemeEntity">
+        SELECT <include refid="Base_Column_List"/> FROM `coupon_theme` ct
+        WHERE ct.is_deleted = 0
+
+        <include refid="listExportCouponTheme_where"/>
+
+        ORDER BY ct.create_time DESC
+
+        <if test="itemsPerPage != null and itemsPerPage != -1">
+            <if test="startItem != null">
+                LIMIT #{startItem}, #{itemsPerPage}
+            </if>
+            <if test="startItem == null">
+                LIMIT #{itemsPerPage}
+            </if>
+        </if>
+    </select>
+
+    <select id="listExportCouponThemeCount" parameterType="com.fcb.coupon.backend.model.dto.CouponThemeExportDo" resultType="java.lang.Integer">
+        SELECT count(*) FROM `coupon_theme` ct
+        WHERE ct.is_deleted = 0
+
+        <include refid="listExportCouponTheme_where"/>
+    </select>
+
+    <select id="listActivityPageCouponTheme" parameterType="com.fcb.coupon.backend.model.dto.CouponThemeActivityPageDo" resultType="com.fcb.coupon.backend.model.entity.CouponThemeEntity">
+        SELECT <include refid="Base_Column_List"/> FROM `coupon_theme` ct
+        WHERE ct.is_deleted = 0
+
+        <include refid="listActivityPageCouponTheme_where"/>
+
+        ORDER BY ct.create_time DESC
+
+        <if test="itemsPerPage != null and itemsPerPage != -1">
+            <if test="startItem != null">
+                LIMIT #{startItem}, #{itemsPerPage}
+            </if>
+            <if test="startItem == null">
+                LIMIT #{itemsPerPage}
+            </if>
+        </if>
+    </select>
+
+    <select id="listActivityPageCouponThemeCount" parameterType="com.fcb.coupon.backend.model.dto.CouponThemeActivityPageDo" resultType="java.lang.Integer">
+        SELECT count(*) FROM `coupon_theme` ct
+        WHERE ct.is_deleted = 0
+
+        <include refid="listActivityPageCouponTheme_where"/>
+    </select>
+
+    <select id="queryAuthThemeId" parameterType="java.lang.Long" resultType="java.lang.Long">
+        select tct.id from coupon_theme tct
+        where tct.is_deleted = 0
+        <if test="orgIds != null and orgIds.size > 0">
+            and exists (select 1 from coupon_theme_org cto where cto.org_id in
+            <foreach collection="orgIds" item="item" separator="," open="(" close=")">#{item}</foreach>
+            and cto.coupon_theme_id = tct.id and cto.is_deleted = 0)
+        </if>
+    </select>
+
+
+    <select id="listByCms" resultType="com.fcb.coupon.backend.model.entity.CouponThemeEntity">
+        select ct.* from coupon_theme ct
+        left join coupon_theme_statistic cts on ct.id=cts.coupon_theme_id
+        where
+        ct.is_deleted = 0
+        <if test="query.ids != null and query.ids.size>0">
+            AND ct.id in
+            <foreach collection="query.ids" item="id" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+        <if test="query.couponGiveRule != null">
+            AND ct.coupon_give_rule = #{query.couponGiveRule}
+        </if>
+        <if test="query.themeType != null">
+            AND ct.theme_type = #{query.themeType}
+        </if>
+        <if test="query.crowdScope != null">AND
+            JSON_CONTAINS(applicable_user_types->'$.ids',JSON_ARRAY(#{query.crowdScope}))
+        </if>
+        <if test="query.status != null">
+            AND ct.status = #{query.status}
+        </if>
+        <if test="query.limitFlag != null and query.limitFlag==1">
+            AND cts.created_count > cts.sended_count
+        </if>
+        <if test="query.merchantList != null and query.merchantList.size>0">
+            AND EXISTS (
+                select * from coupon_theme_org cto where ct.id = cto.coupon_theme_id and cto.org_id in
+                <foreach collection="query.merchantList" item="merchantId" open="(" separator="," close=")">
+                    #{merchantId}
+                </foreach>
+            )
+        </if>
+
+    </select>
+
+</mapper>

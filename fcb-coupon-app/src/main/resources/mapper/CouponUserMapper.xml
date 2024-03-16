@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fcb.coupon.app.mapper.CouponUserMapper">
+
+    <sql id="Base_Column_List">
+        cu.coupon_id,cu.coupon_theme_id,cu.user_id,cu.bind_tel,cu.user_type,cu.status,cu.create_time,cu.end_time
+    </sql>
+
+    <sql id="Effective_Where_Sql">
+        cu.user_id = #{query.userId} and cu.user_type = #{query.userType} and cu.end_time > now()
+        <if test="query.couponDiscountType != null and query.couponDiscountType != ''">
+            and ct.coupon_discount_type = #{query.couponDiscountType}
+        </if>
+        <if test="query.statusList != null and query.statusList.size>0">
+            and cu.status in
+            <foreach collection="query.statusList" index="index" item="status" open="(" separator="," close=")">
+                #{status}
+            </foreach>
+        </if>
+    </sql>
+
+    <sql id="Expired_Where_Sql">
+        cu.user_id = #{query.userId} and cu.user_type = #{query.userType} and now() > cu.end_time and cu.end_time > #{query.endTime}
+        <if test="query.couponDiscountType != null and query.couponDiscountType != ''">
+            and ct.coupon_discount_type = #{query.couponDiscountType}
+        </if>
+        <if test="query.statusList != null and query.statusList.size>0">
+            and cu.status in
+            <foreach collection="query.statusList" index="index" item="status" open="(" separator="," close=")">
+                #{status}
+            </foreach>
+        </if>
+    </sql>
+
+    <select id="countByEffective" parameterType="com.fcb.coupon.app.model.bo.CouponUserListBo" resultType="Integer">
+        SELECT
+        count(*)
+        FROM coupon_user as cu
+        INNER JOIN coupon_theme ct on cu.coupon_theme_id=ct.id
+        WHERE <include refid="Effective_Where_Sql"/>
+    </select>
+
+    <select id="listByEffective" parameterType="com.fcb.coupon.app.model.bo.CouponUserListBo"
+            resultType="com.fcb.coupon.app.model.entity.CouponUserEntity">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM coupon_user as cu
+        INNER JOIN coupon_theme ct on cu.coupon_theme_id=ct.id
+        WHERE <include refid="Effective_Where_Sql"/>
+        <if test="query.sortedBy != null and query.sortedBy == 0">
+            order by cu.create_time desc
+        </if>
+        <if test="query.sortedBy != null and query.sortedBy == 1">
+            order by cu.end_time asc
+        </if>
+        limit ${start}, ${page}
+    </select>
+
+    <select id="countByExpired" parameterType="com.fcb.coupon.app.model.bo.CouponUserListBo" resultType="Integer">
+        SELECT
+        count(*)
+        FROM coupon_user as cu
+        INNER JOIN coupon_theme ct on cu.coupon_theme_id=ct.id
+        WHERE <include refid="Expired_Where_Sql"/>
+    </select>
+
+
+    <select id="listByExpired" parameterType="com.fcb.coupon.app.model.bo.CouponUserListBo"
+            resultType="com.fcb.coupon.app.model.entity.CouponUserEntity">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM coupon_user as cu
+        INNER JOIN coupon_theme ct on cu.coupon_theme_id=ct.id
+        WHERE <include refid="Expired_Where_Sql"/>
+        <if test="query.sortedBy != null and query.sortedBy == 0">
+            order by cu.create_time desc
+        </if>
+        <if test="query.sortedBy != null and query.sortedBy == 1">
+            order by cu.end_time asc
+        </if>
+        limit ${start}, ${page}
+    </select>
+
+
+</mapper>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fcb.coupon.app.mapper.CaptchasMapper">
+
+    <update id="disabledByMobile" parameterType="com.fcb.coupon.app.model.entity.CaptchasEntity">
+       update captchas
+       <set>
+            update_time = now(),
+            success_is  = 1,
+            version_no  = version_no + 1
+       </set>
+       <where>
+
+           <if test="mobile !=null and mobile != ''">
+               and mobile = #{mobile}
+           </if>
+           <if test="businessType != null">
+               and business_type = #{businessType}
+           </if>
+           <if test="deviceId !=null and deviceId != ''">
+               and device_id = #{deviceId}
+           </if>
+
+           and is_deleted = 0
+       </where>
+    </update>
+    <update id="updateByMobile" parameterType="com.fcb.coupon.app.model.entity.CaptchasEntity">
+        update captchas
+        <set>
+        update_time = now(),
+        success_is = #{successIs},
+        version_no = version_no + 1
+        </set>
+        <where>
+        <if test="deviceId != null and deviceId != ''">
+            and device_id = #{deviceId}
+        </if>
+        <if test="mobile != null and mobile != ''">
+            and mobile = #{mobile}
+        </if>
+        <if test="businessType != null ">
+            and business_type = #{businessType}
+        </if>
+        <if test="captcha != null and captcha != ''">
+            and captcha = #{captcha}
+        </if>
+        <if test="expireTime != null">
+             and expire_time >= #{expireTime}
+        </if>
+        and is_deleted = 0
+        and success_is = 0
+        </where>
+    </update>
+
+</mapper>

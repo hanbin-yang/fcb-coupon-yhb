@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fcb.coupon.backend.mapper.AsyncTaskMapper">
+  <resultMap id="BaseResultMap" type="com.fcb.coupon.backend.model.entity.AsyncTaskEntity">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="task_type" jdbcType="VARCHAR" property="taskType" />
+    <result column="down_path" jdbcType="VARCHAR" property="downPath" />
+    <result column="async_status" jdbcType="TINYINT" property="asyncStatus" />
+    <result column="records" jdbcType="INTEGER" property="records" />
+    <result column="create_file_time" jdbcType="TIMESTAMP" property="createFileTime" />
+    <result column="success_record" jdbcType="INTEGER" property="successRecord" />
+    <result column="fail_record" jdbcType="INTEGER" property="failRecord" />
+    <result column="create_userid" jdbcType="BIGINT" property="createUserid" />
+    <result column="create_username" jdbcType="VARCHAR" property="createUsername" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_userid" jdbcType="BIGINT" property="updateUserid" />
+    <result column="update_username" jdbcType="VARCHAR" property="updateUsername" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="version_no" jdbcType="INTEGER" property="versionNo" />
+    <result column="is_deleted" jdbcType="TINYINT" property="isDeleted" />
+  </resultMap>
+
+  <sql id="Base_Column_List">
+    id, task_type, down_path, async_status, records, success_record, fail_record, create_file_time,
+    create_userid, create_username,create_time, update_userid, update_username, update_time, is_deleted, version_no
+  </sql>
+
+  <sql id="listAsyncTask_where">
+    WHERE is_deleted=0
+    <if test="createUserid != null">AND
+      create_userid = #{createUserid}
+    </if>
+  </sql>
+
+  <select id="listAsyncTask" parameterType="com.fcb.coupon.backend.model.dto.AsyncTaskListDto" resultMap="BaseResultMap">
+    SELECT <include refid="Base_Column_List" />
+    FROM async_task
+    <include refid="listAsyncTask_where"/>
+    ORDER BY create_time DESC
+    <if test="itemsPerPage != null and itemsPerPage != -1">
+      <if test="startItem != null">
+        LIMIT #{startItem}, #{itemsPerPage}
+      </if>
+      <if test="startItem == null">
+        LIMIT #{itemsPerPage}
+      </if>
+    </if>
+  </select>
+
+  <select id="listAsyncTaskCount" parameterType="com.fcb.coupon.backend.model.dto.AsyncTaskListDto" resultType="java.lang.Integer">
+    SELECT count(*) FROM async_task
+    <include refid="listAsyncTask_where"/>
+  </select>
+</mapper>

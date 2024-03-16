@@ -1,0 +1,103 @@
+spring:
+  cloud:
+    nacos:
+      config:
+        server-addr: https://nacos-dev.fcb.com.cn
+        file-extension: yml
+        namespace: fcb-coupon
+        ext-config:
+          - dataId: '${spring.application.name}-page-info-${spring.profiles.active}.yml'
+            refresh: true
+          - dataId: 'fcb-coupon-common-${spring.profiles.active}.yml'
+            refresh: true
+      discovery:
+        server-addr: https://nacos-dev.fcb.com.cn
+        enabled: true
+        register-enabled: true
+
+
+
+  shardingsphere:
+    enabled: true
+    props:
+      sql:
+        show: true
+    dataSource:
+      names: dbcoupon
+      dbcoupon:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        jdbcUrl: jdbc:mysql://10.101.40.21:3306/db_coupon?Unicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false
+        username: root
+        password: ody,123
+        connection-timeout: 2000
+        max-lifetime: 600000
+        minimum-idle: 10
+        maximum-pool-size: 10
+    sharding:
+      default-data-source-name: dbcoupon
+      tables:
+        coupon:
+          actual-data-nodes: dbcoupon.coupon00${1..9},dbcoupon.coupon0${10..32}
+          table-strategy:
+            complex:
+              algorithm-class-name: com.fcb.coupon.backend.infra.jdbc.CouponTableComplexKeysShardingAlgorithm
+              sharding-columns: id
+
+  redis:
+    cluster:
+      nodes: 10.101.40.74:7000,10.101.40.74:7001,10.101.40.74:7002,10.101.40.75:7000,10.101.40.75:7001,10.101.40.75:7002
+    password: aiVK8ffFCV71L14h
+    timeout: 3000
+  kafka:
+    producer:
+      bootstrap-servers: 10.101.40.40:9092,10.101.40.41:9092,10.101.40.42:9092
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      enable-auto-commit: false
+      bootstrap-servers: 10.101.40.40:9092,10.101.40.41:9092,10.101.40.42:9092
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      group-id: ${spring.application.name}
+      auto-offset-reset: latest
+    listener:
+      ack-mode: manual
+      concurrency: 5
+  data:
+    mongodb:
+      host: 10.101.40.21
+      port: 27017
+      database: crm
+      username: crmUser
+      password: ody,123
+    elasticsearch:
+      repositories:
+        enabled: true
+      cluster-name: elasticsearch
+      cluster-nodes: 10.101.40.73:9300
+  elasticsearch:
+    rest:
+      uris: http://10.101.40.73:9200
+
+feign:
+  httpclient:
+    enabled: true
+    connection-timeout: 3000
+
+logging:
+  level:
+    com:
+      fcb: INFO
+
+
+remote:
+  url:
+    broker:
+      domain: https://broker-dev-api.fcb.com.cn
+    middleend:
+      adminportal: https://middleend-dev-adminportal.fcb.com.cn
+    customer:
+      domain: http://customer-dev-api.fcb.com.cn
+
+

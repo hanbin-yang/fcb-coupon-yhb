@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fcb.coupon.backend.mapper.CouponVerificationMapper">
+  <resultMap id="BaseResultMap" type="com.fcb.coupon.backend.model.entity.CouponVerificationEntity">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="coupon_id" jdbcType="BIGINT" property="couponId" />
+    <result column="theme_title" jdbcType="VARCHAR" property="themeTitle" />
+    <result column="coupon_theme_id" jdbcType="BIGINT" property="couponThemeId" />
+    <result column="coupon_discount_type" jdbcType="TINYINT" property="couponDiscountType" />
+    <result column="coupon_value" jdbcType="DECIMAL" property="couponValue" />
+    <result column="coupon_code" jdbcType="VARCHAR" property="couponCode" />
+    <result column="order_code" jdbcType="VARCHAR" property="orderCode" />
+    <result column="subscribe_code" jdbcType="VARCHAR" property="subscribeCode" />
+    <result column="bind_user_id" jdbcType="VARCHAR" property="bindUserId" />
+    <result column="bind_tel" jdbcType="VARCHAR" property="bindTel" />
+    <result column="used_time" jdbcType="TIMESTAMP" property="usedTime" />
+    <result column="used_channel" jdbcType="TINYINT" property="usedChannel" />
+    <result column="used_store_id" jdbcType="BIGINT" property="usedStoreId" />
+    <result column="used_store_code" jdbcType="VARCHAR" property="usedStoreCode" />
+    <result column="used_store_name" jdbcType="VARCHAR" property="usedStoreName" />
+    <result column="used_room_guid" jdbcType="VARCHAR" property="usedRoomGuid" />
+    <result column="product_name" jdbcType="VARCHAR" property="productName" />
+    <result column="product_code" jdbcType="VARCHAR" property="productCode" />
+    <result column="product_amount" jdbcType="DECIMAL" property="productAmount" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+    <result column="coupon_create_time" jdbcType="TIMESTAMP" property="couponCreateTime" />
+    <result column="user_type" jdbcType="INTEGER" property="userType" />
+    <result column="start_time" jdbcType="TIMESTAMP" property="startTime" />
+    <result column="end_time" jdbcType="TIMESTAMP" property="endTime" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="create_userid" jdbcType="BIGINT" property="createUserid" />
+    <result column="create_username" jdbcType="VARCHAR" property="createUsername" />
+    <result column="verify_userid" jdbcType="BIGINT" property="verifyUserid" />
+    <result column="verify_username" jdbcType="VARCHAR" property="verifyUsername" />
+    <result column="version_no" jdbcType="INTEGER" property="versionNo" />
+    <result column="is_deleted" jdbcType="TINYINT" property="isDeleted" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, coupon_id, theme_title, coupon_theme_id, coupon_discount_type, coupon_value, coupon_code, order_code, subscribe_code,
+    bind_user_id, bind_tel, user_type, used_time, used_channel, used_store_id, used_store_code, used_store_name,
+    used_room_guid, product_name, product_code, product_amount, `status`, coupon_create_time, 
+    start_time, end_time, create_time, create_userid, create_username, verify_userid,
+    verify_username, version_no, is_deleted
+  </sql>
+
+  <sql id="Base_Column_List_Without_id">
+    coupon_id, theme_title, coupon_theme_id, coupon_discount_type, coupon_value, coupon_code, order_code, subscribe_code,
+    bind_user_id, bind_tel, user_type, used_time, used_channel, used_store_id, used_store_code, used_store_name,
+    used_room_guid, product_name, product_code, product_amount, `status`, coupon_create_time,
+    start_time, end_time, create_time, create_userid, create_username, verify_userid,
+    verify_username, version_no, is_deleted
+  </sql>
+  <insert id="insertOrUpdate">
+    insert into coupon_verification
+    (<include refid="Base_Column_List_Without_id" />)
+    value
+    (
+    #{entity.couponId},#{entity.themeTitle},#{entity.couponThemeId},#{entity.couponDiscountType},#{entity.couponValue},#{entity.couponCode},
+    #{entity.orderCode},#{entity.subscribeCode},#{entity.bindUserId},#{entity.bindTel},#{entity.userType},#{entity.usedTime},
+    #{entity.usedChannel},#{entity.usedStoreId},#{entity.usedStoreCode},#{entity.usedStoreName},
+    #{entity.usedRoomGuid},#{entity.productName},#{entity.productCode},#{entity.productAmount},
+    #{entity.status},#{entity.couponCreateTime},#{entity.startTime},
+    #{entity.endTime},#{entity.createTime},#{entity.createUserid},#{entity.createUsername},
+    #{entity.verifyUserid},#{entity.verifyUsername},#{entity.versionNo},#{entity.isDeleted}
+    )
+    ON DUPLICATE KEY UPDATE
+    order_code = values(order_code),
+    subscribe_code = values(subscribe_code),
+    bind_tel = values(bind_tel),
+    used_time = values(used_time),
+    used_channel = values(used_channel),
+    used_store_id = values(used_store_id),
+    used_store_code = values(used_store_code),
+    used_store_name = values(used_store_name),
+    used_room_guid = values(used_room_guid),
+    product_name = values(product_name),
+    product_code = values(product_code),
+    product_amount = values(product_amount),
+    status = values(status),
+    user_type = values(user_type),
+    verify_userid = values(verify_userid),
+    verify_username = values(verify_username)
+  </insert>
+
+  <select id="listVerificationCount"
+          resultType="com.fcb.coupon.backend.model.dto.CouponVerificationStatisticDo">
+        select coupon_theme_id as couponThemeId, count(id) as `count` from coupon_verification
+        where `status` = 2 and is_deleted = 0 and coupon_theme_id in
+        <foreach collection="list" item="couponThemeId" open="(" separator="," close=")">
+          #{couponThemeId}
+        </foreach>
+        group by coupon_theme_id
+  </select>
+</mapper>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.fcb.coupon.backend.mapper.CouponOprLogMapper">
+  <resultMap id="BaseResultMap" type="com.fcb.coupon.backend.model.entity.CouponOprLogEntity">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="opr_theme_type" jdbcType="INTEGER" property="oprThemeType" />
+    <result column="opr_type" jdbcType="INTEGER" property="oprType" />
+    <result column="opr_summary" jdbcType="VARCHAR" property="oprSummary" />
+    <result column="opr_ref_id" jdbcType="BIGINT" property="oprRefId" />
+    <result column="ext_data" jdbcType="VARCHAR" property="extData" />
+    <result column="oper_content" jdbcType="VARCHAR" property="operContent" />
+    <result column="create_userid" jdbcType="BIGINT" property="createUserid" />
+    <result column="create_username" jdbcType="VARCHAR" property="createUsername" />
+    <result column="create_time" jdbcType="TIMESTAMP" property="createTime" />
+    <result column="update_userid" jdbcType="BIGINT" property="updateUserid" />
+    <result column="update_username" jdbcType="VARCHAR" property="updateUsername" />
+    <result column="update_time" jdbcType="TIMESTAMP" property="updateTime" />
+    <result column="version_no" jdbcType="INTEGER" property="versionNo" />
+    <result column="is_deleted" jdbcType="TINYINT" property="isDeleted" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    id, opr_theme_type, opr_type, opr_summary,
+    opr_ref_id, ext_data, oper_content,
+    create_userid, create_username, create_time,
+    update_userid, update_username,update_time,
+    version_no, is_deleted
+  </sql>
+  <insert id="insertBatch">
+    insert into coupon_opr_log
+    (
+    <include refid="Base_Column_List" />
+    )
+    values
+    <foreach collection="list" item="m" separator=",">
+      (
+      #{m.id},#{m.oprThemeType},#{m.oprType},#{m.oprSummary},
+      #{m.oprRefId},#{m.extData},#{m.operContent},
+      #{m.createUserid},#{m.createUsername},#{m.createTime},
+      #{m.updateUserid},#{m.updateUsername},#{m.updateTime},
+      #{m.versionNo},#{m.isDeleted}
+      )
+    </foreach>
+  </insert>
+</mapper>
