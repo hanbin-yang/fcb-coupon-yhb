@@ -1,28 +1,25 @@
 package com.fcb.coupon.backend.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.fcb.coupon.backend.mapper.CouponUserMapper;
 import com.fcb.coupon.backend.mapper.CouponUserStatisticMapper;
-import com.fcb.coupon.backend.model.entity.CouponEntity;
 import com.fcb.coupon.backend.model.entity.CouponUserEntity;
 import com.fcb.coupon.backend.model.entity.CouponUserStatisticEntity;
-import com.fcb.coupon.backend.service.CouponUserService;
 import com.fcb.coupon.backend.service.CouponUserStatisticService;
-import com.fcb.coupon.common.enums.CouponStatusEnum;
 import com.fcb.coupon.common.util.DateUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.units.qual.K;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
-import javax.annotation.CheckForNull;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**

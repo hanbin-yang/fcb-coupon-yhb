@@ -108,7 +108,7 @@ public class I18nUtils {
             cache.put(cacheKey, map);
             String filePath = "mtc/" + poolName + "_" + locale + ".txt";
             try (InputStream is = I18nUtils.class.getClassLoader().getResourceAsStream(filePath)) {
-                List<String> lines = IOUtils.readLines(is, Charset.forName("utf-8"));
+                List<String> lines = IOUtils.readLines(is, "utf-8");
                 
                 StringBuilder key = new StringBuilder(), value = new StringBuilder();
                 

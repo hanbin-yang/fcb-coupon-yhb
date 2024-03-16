@@ -3,7 +3,6 @@ package com.fcb.coupon.app.model.param.request;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import org.checkerframework.checker.units.qual.min;
 import org.hibernate.validator.constraints.Length;
 
 import javax.validation.constraints.NotBlank;
