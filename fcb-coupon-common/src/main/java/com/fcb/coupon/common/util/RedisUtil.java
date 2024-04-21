@@ -32,12 +32,12 @@ public class RedisUtil {
     private static final Logger logger = LoggerFactory.getLogger(RedisUtil.class);
 
     private static final RedissonClient redissonClient = SpringBeanFactory.getBean(RedissonClient.class);
+
     // 自增主键 key
     private static final String GENERATE_ID_KEY = "coupon:generateId:";
-    // 默认失效时间 （秒）
-    private static final Integer DEFAULT_EXPIRE_SECONDS = 120;
 
     /**
+     * 自带锁续期
      * @param keyName    redis key
      * @param waitSeconds 等待秒数 0不等待
      * @param supplier   业务代码提供者
@@ -45,10 +45,28 @@ public class RedisUtil {
      * @return 返回RedisLockResult包装对象 -> obj:业务代码返回对象
      */
     public static <V> RedisLockResult<V> executeTryLock(String keyName, long waitSeconds, Supplier<V> supplier) {
-        return executeTryLock(keyName, waitSeconds, DEFAULT_EXPIRE_SECONDS, TimeUnit.SECONDS, supplier);
+        return executeTryLock(keyName, waitSeconds, -1, TimeUnit.SECONDS, supplier);
     }
+
     public static RedisLockResult<Void> executeTryLock(String keyName, long waitSeconds, VoidSupplier supplier) {
-        return executeTryLock(keyName, waitSeconds, DEFAULT_EXPIRE_SECONDS, TimeUnit.SECONDS, supplier);
+        return executeTryLock(keyName, waitSeconds, -1, TimeUnit.SECONDS, supplier);
+    }
+
+    /**
+     * 不带锁续期，需要指定 expireSeconds
+     * @param keyName   redis key
+     * @param waitSeconds  锁最大等待时间 秒
+     * @param expireSeconds  redis过期时间 秒
+     * @param supplier  supplier
+     * @param <V> 返回类型
+     * @return 返回RedisLockResult包装对象 -> obj:业务代码返回对象
+     */
+    public static <V> RedisLockResult<V> executeTryLock(String keyName, long waitSeconds, long expireSeconds, Supplier<V> supplier) {
+        return executeTryLock(keyName, waitSeconds, expireSeconds, TimeUnit.SECONDS, supplier);
+    }
+
+    public static RedisLockResult<Void> executeTryLock(String keyName, long waitSeconds, long expireSeconds, VoidSupplier supplier) {
+        return executeTryLock(keyName, waitSeconds, expireSeconds, TimeUnit.SECONDS, supplier);
     }
 
     /**
@@ -97,7 +115,7 @@ public class RedisUtil {
             } catch (Exception e) {
                 stopWatch.stop();
                 logger.error(stopWatch.prettyPrint());
-                logger.error("RedisUtil#executeTryLock解锁失败: required expireTime={}ms", timeUnit.toMillis(expireTime), e);
+                logger.error("RedisUtil#executeTryLock解锁失败", e);
             }
         }
 
@@ -115,6 +133,7 @@ public class RedisUtil {
     public static <V> V executeLock(String keyName, long expireTime, TimeUnit timeUnit, Supplier<V> supplier) {
         return doExecuteLock(keyName, expireTime, timeUnit, supplier);
     }
+
     public static void executeLock(String keyName, long expireTime, TimeUnit timeUnit, VoidSupplier supplier) {
         doExecuteLock(keyName, expireTime, timeUnit, supplier);
     }
@@ -240,12 +259,8 @@ public class RedisUtil {
         return DateUtil.between(beginDate, expireDate, DateUnit.SECOND);
     }
 
-    /*
-     * @description 基于lue脚本实现的加锁，解决Redisession不能跨线程的问题
-     * @author 唐陆军
-     * @date 2021-6-1 14:40
-     */
     private static final String LUA_LOCK_SCRIPT = "if redis.call('setnx', KEYS[1], ARGV[1]) == 1 then return redis.call('expire', KEYS[1], ARGV[2]) else return 0 end";
+
     private static final String LUA_UNLOCK_SCRIPT = "if redis.call('get',KEYS[1]) == ARGV[1] then return redis.call('del',KEYS[1]) else return 0 end";
 
     public static boolean tryLock(String lockKey, String lockValue, Integer expireSeconds) {
